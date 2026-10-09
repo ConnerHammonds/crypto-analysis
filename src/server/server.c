@@ -21,6 +21,8 @@
             };
 */
 
+#define PORT "1738"
+#define BACKLOG 5
 
 int main(int argc, char *argv[])
 {
@@ -40,7 +42,7 @@ int main(int argc, char *argv[])
   // Note: the NULL parameter defaults to the localhost IP but a specific IP can be set if desired
   // servinfo is filled in with the server information after the call.
   // getaddrinfo expects a pointer to a pointer which is why the & operator is there
-  status = getaddrinfo(NULL, "3490", &hints, &servinfo)
+  status = getaddrinfo(NULL, PORT, &hints, &servinfo);
   if (status != 0) {
     fprintf(stderr, "gai error: %s\n", gai_strerror(status));
     exit(1);
@@ -51,22 +53,36 @@ int main(int argc, char *argv[])
   socketfd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
   if (socketfd == -1) {
     printf("Error creating socket");
+    exit(1);
   }
 
   // bind to port (free addrinfo after)
-  bind(socketfd, servinfo->ai_addr, servinfo->ai_addrlen);
+  if (bind(socketfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+    printf("Error binding port");
+    exit(1);
+  }
+
   // free memory. Use freeaddrinfo() because it knows that servinfo is a linked list
   // and will free the memory recursively
   // no longer need servinfo
   freeaddrinfo(servinfo);
 
-  // listen for connections
   // pass in the socket file descriptor, and the maximum backlog of connection requests
-  listen(socketfd, 5);
+  if (listen(socketfd, BACKLOG) == -1) {
+    printf("Error listening to port");
+    exit(1);
+  }
 
-  // RESUME WORK HERE
-  // accept connections
-  accept();
+  // pass in the socket file descriptor as well as the incoming connection's
+  // address and address length
+  // Note that the connection address has to be type cast to sockaddr
+  struct sockaddr_storage their_addr;
+  socklen_t addrlen = sizeof(their_addr);
+  new_fd = accept(socketfd,  (struct sockaddr *)&their_addr, &addrlen);
+  if (new_fd == -1) {
+    printf("Error accepting connection");
+    exit(1);
+  }
 
   // start main loop
   
