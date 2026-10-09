@@ -1,6 +1,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 //Note since I always forget
 //the * operator indicates a pointer
@@ -27,9 +31,10 @@
 int main(int argc, char *argv[])
 {
   int status;
-
   struct addrinfo hints;
   struct addrinfo *servinfo; // pointer to results
+  int listen_sock; // socket that listens for incoming connections
+  int conn_sock; // socket that is created on accept() call for communication
 
   
 
@@ -50,14 +55,14 @@ int main(int argc, char *argv[])
 
   // create socket
   // pass in the address family (IPv4 or IPv6), socket type (stream or datagram), and protocol (tcp for stream, and udp for datagram)
-  socketfd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
-  if (socketfd == -1) {
+  listen_sock = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+  if (listen_sock == -1) {
     printf("Error creating socket");
     exit(1);
   }
 
   // bind to port (free addrinfo after)
-  if (bind(socketfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+  if (bind(listen_sock, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
     printf("Error binding port");
     exit(1);
   }
@@ -68,7 +73,7 @@ int main(int argc, char *argv[])
   freeaddrinfo(servinfo);
 
   // pass in the socket file descriptor, and the maximum backlog of connection requests
-  if (listen(socketfd, BACKLOG) == -1) {
+  if (listen(listen_sock, BACKLOG) == -1) {
     printf("Error listening to port");
     exit(1);
   }
@@ -78,14 +83,45 @@ int main(int argc, char *argv[])
   // Note that the connection address has to be type cast to sockaddr
   struct sockaddr_storage their_addr;
   socklen_t addrlen = sizeof(their_addr);
-  new_fd = accept(socketfd,  (struct sockaddr *)&their_addr, &addrlen);
-  if (new_fd == -1) {
+  conn_sock = accept(listen_sock,  (struct sockaddr *)&their_addr, &addrlen);
+  if (conn_sock == -1) {
     printf("Error accepting connection");
     exit(1);
   }
-
-  // start main loop
   
-  // close socket after done
+  char prompt[] = "Ask for message 1, 2, or 3 by typing the respective number\n";
+  char msg1[] = "This is message 1\n";
+  char msg2[] = "This is message 2\n";
+  char msg3[] = "This is message 3\n";
+  char buffer[100];
+  
+  while (1) {
+  send(conn_sock, prompt, strlen(prompt), 0);
+  ssize_t byte_count = recv(conn_sock, buffer, sizeof(buffer) - 1, 0);
+  if (byte_count <= 0) {
+      printf("No message received");
+      break;
+    }
+
+  buffer[byte_count] = '\0'; //add null terminator on the end of the message
+    
+    switch (buffer[0]) {
+      case '1':
+        send(conn_sock, msg1, strlen(msg1), 0);
+        break;
+      case '2':
+        send(conn_sock, msg2, strlen(msg2), 0);
+        break;
+      case '3':
+        send(conn_sock, msg3, strlen(msg3), 0);
+        break;
+      case 'q':
+        exit(0);
+      default:
+        printf("invalid input");
+    }
+  }
+  
+  close(conn_sock);
 }
 
