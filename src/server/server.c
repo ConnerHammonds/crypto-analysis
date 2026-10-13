@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
   char msg1[] = "This is message 1\n";
   char msg2[] = "This is message 2\n";
   char msg3[] = "This is message 3\n";
-  char buffer[100];
+  char buffer[1000];
   
   while (1) {
   send(conn_sock, prompt, strlen(prompt), 0);
