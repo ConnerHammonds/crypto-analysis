@@ -1,12 +1,14 @@
 #include "http.h"
 
+//Route routes[] = {};
+
 // typedef struct {
 //  char method[10];
 //  char path[256];
 //  char protocol[16];
 // } Request;
 
-
+//passes in a request that is initialized but not filled
 int parseRequest(char buffer[], Request *request) {
   
   //initialize poiters at the end of the method, path, and protocol
@@ -48,3 +50,12 @@ int parseRequest(char buffer[], Request *request) {
   return(0);
 }
 
+//passes in the same request after being filled by parseRequest()
+void routeResponse(Request *request) {
+
+  //find the request in the routes table
+  //call the function associated with it
+  
+  //return error 404 if not in routing table
+
+}
