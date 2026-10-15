@@ -1,6 +1,29 @@
 #include "http.h"
 
-//Route routes[] = {};
+static const Route routes[] = {
+  //get home page
+  {
+    .request = {
+      .method = "GET", 
+      .path = "/",
+      .protocol = "HTTP/1.1" 
+    },
+
+    .handler = handle_home
+  },
+
+  //get account info
+  {
+    .request = {
+      .method = "GET",
+      .path = "/account",
+      .protocol = "HTTP/1.1"
+    },
+  
+    .handler = handle_account
+  }
+
+};
 
 // typedef struct {
 //  char method[10];
@@ -52,10 +75,22 @@ int parseRequest(char buffer[], Request *request) {
 
 //passes in the same request after being filled by parseRequest()
 void routeResponse(Request *request) {
-
+  
+  for (int i = 0; i < (sizeof(routes) - sizeof(routes[0]); i++) {
+    break;
+  }
   //find the request in the routes table
   //call the function associated with it
   
   //return error 404 if not in routing table
 
+}
+
+//Handler functions from here down
+Response handle_home() {
+  return(0);
+}
+
+Response handle_account() {
+  return(0);
 }
