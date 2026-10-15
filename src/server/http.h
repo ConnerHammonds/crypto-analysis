@@ -13,6 +13,16 @@ typedef struct {
   char status_message[16];
 } Response;
 
+// define the handler function type
+// Accepts the appropriate http request and sends the appropriate response
+// Will be stored in a routing table with the request that it corresponds to
+typedef void (*handlerFunction)(Request *request, Response *response);
+
+typedef struct {
+  Request request;
+  handlerFunction handler;
+} Route;
+
 // accepts a request buffer and writes to the struct that the pointer points to
 int parseRequest(char buffer[], Request *request);
 int sendResponse();
