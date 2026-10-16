@@ -25,12 +25,6 @@ static const Route routes[] = {
 
 };
 
-// typedef struct {
-//  char method[10];
-//  char path[256];
-//  char protocol[16];
-// } Request;
-
 //passes in a request that is initialized but not filled
 int parseRequest(char buffer[], Request *request) {
   
@@ -73,24 +67,51 @@ int parseRequest(char buffer[], Request *request) {
   return(0);
 }
 
+Response send404() {
+  Response response;
+
+  response.status_code = "404";
+  response.status_message = "Not Found";
+  response.protocol = "HTTP/1.1";
+
+  return(response);
+}
 //passes in the same request after being filled by parseRequest()
 void routeResponse(Request *request) {
   
-  for (int i = 0; i < (sizeof(routes) - sizeof(routes[0]); i++) {
-    break;
-  }
-  //find the request in the routes table
-  //call the function associated with it
-  
-  //return error 404 if not in routing table
+  size_t routesLen = sizeof(routes) / sizeof(routes[0]);
 
+  for (int i = 0; i < routesLen; i++) {
+    //use strcmp to compare current http request in the routes table to the passed in request
+    //if they are equal, call the corresponding handler
+    if (strcmp(request->method, routes[i].request.method) == 0 &&
+        strcmp(request->path, routes[i].request.path) == 0 &&
+        strcmp(request->protocol, routes[i].request.protocol) == 0) {
+          routes[i].handler(request);
+          return;
+    }
+  }
+  //return error 404 if not in routing table
+  send404();
 }
 
 //Handler functions from here down
 Response handle_home() {
-  return(0);
+  Response response;
+
+  response.status_code = "200";
+  response.status_message = "OK";
+  response.protocol = "HTTP/1.1";
+  
+  return(response);
 }
 
 Response handle_account() {
-  return(0);
+  Response response;
+
+  response.status_code = "200";
+  response.status_message = "Account info";
+  response.protocol = "HTTP/1.1";
+ 
+  return(response);
 }

@@ -16,7 +16,7 @@ typedef struct {
 // define the handler function type
 // Accepts the appropriate http request and sends the appropriate response
 // Will be stored in a routing table with the request that it corresponds to
-typedef void (*handlerFunction)(Request *request, Response *response);
+typedef Response (*handlerFunction)(Request *request);
 
 typedef struct {
   Request request;
